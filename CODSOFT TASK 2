@@ -1,0 +1,88 @@
+class TicTacToe:
+    def __init__(self):
+        self.board = [' ' for _ in range(9)] # we will use a single list to represent the board
+        self.current_winner = None # keep track of winner!
+
+    def print_board(self):
+        # this is just getting the rows
+        for row in [self.board[i*3:(i+1)*3] for i in range(3)]:
+            print('| ' + ' | '.join(row) + ' |')
+
+    # we'll also create a static method, which will be used later
+    @staticmethod
+    def print_board_nums():
+        # tells us what number corresponds to what box
+        number_board = [[str(i) for i in range(j*3, (j+1)*3)] for j in range(3)]
+        for row in number_board:
+            print('| ' + ' | '.join(row) + ' |')
+
+    def available_moves(self):
+        return [i for i, spot in enumerate(self.board) if spot == ' ']
+
+    def empty_squares(self):
+        return ' ' in self.board
+
+    def num_empty_squares(self):
+        return self.board.count(' ')
+
+    def make_move(self, square, letter):
+        # if valid move, then make the move (assign square to letter)
+        # then return True. if invalid, return False
+        if self.board[square] == ' ':
+            self.board[square] = letter
+            if self.winner(square, letter):
+                self.current_winner = letter
+            return True
+        return False
+
+    def winner(self, square, letter):
+        # check the row
+        row_ind = square // 3
+        row = self.board[row_ind*3 : (row_ind + 1) * 3]
+        if all([spot == letter for spot in row]):
+            return True
+        col_ind = square % 3
+        column = [self.board[col_ind+i*3] for i in range(3)]
+        if all([spot == letter for spot in column]):
+            return True
+        if square % 2 == 0:
+            diagonal1 = [self.board[i] for i in [0, 4, 8]] # left to right diagonal
+            if all([spot == letter for spot in diagonal1]):
+                return True
+            diagonal2 = [self.board[i] for i in [2, 4, 6]] # right to left diagonal
+            if all([spot == letter for spot in diagonal2]):
+                return True
+        # if all of these fail
+        return False
+
+# After setting up the TicTacToe class, we can define the minimax function outside the class
+def minimax(state, depth, maximizingPlayer):
+    if state.current_winner == 'O': # AI
+        return {'position': None, 'score': 1 * (depth + 1)}
+    elif state.current_winner == 'X': # human
+        return {'position': None, 'score': -1 * (depth + 1)}
+    elif not state.empty_squares(): # draw
+        return {'position': None, 'score': 0}
+
+    if maximizingPlayer:
+        maxEval = {'position': None, 'score': -math.inf} # each score should maximize (be larger)
+        for possible_move in state.available_moves():
+            state.make_move(possible_move, 'O')
+            eval = minimax(state, depth+1, False)
+            state.board[possible_move] = ' '
+            state.current_winner = None
+            eval['position'] = possible_move
+            if eval['score'] > maxEval['score']:
+                maxEval = eval
+        return maxEval
+    else: # minimizing player
+        minEval = {'position': None, 'score': math.inf} # each score should minimize
+        for possible_move in state.available_moves():
+            state.make_move(possible_move, 'X')
+            eval = minimax(state, depth+1, True)
+            state.board[possible_move] = ' '
+            state.current_winner = None
+            eval['position'] = possible_move
+            if eval['score'] < minEval['score']:
+                minEval = eval
+        return minEval
