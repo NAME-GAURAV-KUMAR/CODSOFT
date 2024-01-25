@@ -1,0 +1,24 @@
+class SimpleChatBot:
+    def __init__(self):
+        self.rules = {
+            "hello": "Hello! How can I assist you today?",
+            "how are you": "I'm a bot, so I don't have feelings, but I'm here to help you. How can I assist you?",
+            "what is your name": "I'm a simple rule-based chatbot.",
+            "default": "I'm sorry, I didn't understand that. Could you please rephrase?"
+        }
+
+    def respond(self, user_input):
+        user_input = user_input.lower()
+        for pattern, response in self.rules.items():
+            if pattern in user_input:
+                return response
+        return self.rules["default"]
+
+chatbot = SimpleChatBot()
+
+while True:
+    user_input = input("User: ")
+    if user_input.lower() == "quit":
+        break
+    response = chatbot.respond(user_input)
+    print(f"ChatBot: {response}")
